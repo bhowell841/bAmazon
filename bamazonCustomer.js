@@ -1,5 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const chalk = require("chalk");
+var Table = require("cli-table");
 
 var choiceArray = [];
 
