@@ -33,7 +33,7 @@ connection.connect(function (err) {
                     console.log(" ");
                     console.log("YEAH, buy some shit!");
                     console.log(" ");
-                    
+
                     // go to the purchase function
                     buyProducts();
                 } else {
@@ -90,13 +90,42 @@ function buyProducts() {
             }
         ])
         .then(function (answer) {
-            connection.query("select productName, quantity from products where id=?", answer.buyItem, function (err, data) {
+            connection.query("select productName,  price, quantity from products where id=?", answer.buyItem, function (err, data) {
                 if(err) throw err;
                 console.log(" ");
-                console.log("answers", answer.buyQuantity); // may have to parse
-                console.log("database", data[0].quantity);
+                // console.log("answers", answer.buyQuantity); // may have to parse
+                // console.log("database", data[0].quantity);
+                itemPurchased = data[0].productName;
+                console.log(itemPurchased);
+                price = parseInt(data[0].price);
+                console.log(price);
+                orderNum = parseInt(answer.buyQuantity);
+                console.log(orderNum);
+                stockNum = data[0].quantity;
+                console.log(stockNum);
 
-                // console.log(data.buyItem.quantity);
+                inquirer.prompt({
+                    name: "confirmOrder",
+                    type: "list",
+                    message: "Confirm order", // Fix so that is incorporates the items and quantities
+                    choices: ["Yes", "No"]
+                })
+                .then(function(answer){
+                    console.log(answer.confirmOrder);
+                })
+                // if confirm is yes do below, else showProducts()
+// compare to the stock number
+
+                if(orderNum <= stockNum){
+                    console.log("Processing Order");
+                    // compute price
+                    // append the db
+                    // showProducts()
+                }else{
+                    console.log("Not enough items in stock.");
+                    showProducts();
+                }
+                
             })
         })
 } // end of buyProducts function
