@@ -105,13 +105,14 @@ function buyProducts() {
                 console.log(" ");
                 // console.log("answers", answer.buyQuantity); 
                 // console.log("database", data[0].quantity);
-                itemPurchased = data[0].productName;
+                let productId = answer.buyItem;
+                var itemPurchased = data[0].productName;
                 console.log(itemPurchased);
-                price = parseInt(data[0].price);
+                var price = parseInt(data[0].price);
                 console.log(price);
-                orderNum = parseInt(answer.buyQuantity);
+                var orderNum = parseInt(answer.buyQuantity);
                 console.log(orderNum);
-                stockNum = data[0].quantity;
+                var stockNum = data[0].quantity;
                 console.log(stockNum);
 
                 inquirer.prompt({
@@ -127,7 +128,12 @@ function buyProducts() {
 
                         if (answer.confirmOrder === "Yes") {
                             console.log("You said yes!");
-                            checkAvailability(orderNum, stockNum)
+                            checkAvailability(orderNum, stockNum, price)
+                            computePrice(orderNum, price);
+                            var newQuantity = stockNum - orderNum;
+                            console.log(newQuantity);
+                            updateDatabase(newQuantity, productId);
+                            
                         } else {
                             console.log("You said no!")
                             showProducts();
@@ -138,15 +144,16 @@ function buyProducts() {
 } // end of buyProducts function
 
 
-function checkAvailability() {
+function checkAvailability(orderNum, stockNum, price) {
     if (orderNum <= stockNum) {
         console.log("Processing Order");
-        computePrice(orderNum, price);
+        // computePrice(orderNum, price);
+        // updateDatabase(newQuantity);
         // append the db
-        showProducts()
+        // showProducts()
     } else {
         console.log("Not enough items in stock.");
-        showProducts(myFunc); // not quite right
+        showProducts(myFunc); 
     }
 } // end of checkAvailility function
 
@@ -155,3 +162,12 @@ function computePrice(orderNum, price) {
     var totalPrice = orderNum * price;
     console.log("You total price is: " + totalPrice);
 } // end of computePrice function
+
+function updateDatabase(newQuantity, productId){
+    connection.query(
+        'UPDATE products SET quantity = ? WHERE id = ?', [newQuantity, productId], function(err){
+            if(err) throw err;
+        }
+    )
+} // end updateDatabase function
+
