@@ -1,3 +1,7 @@
+// Fix too many purchase
+// update the db
+// return to main after purchase
+
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 const chalk = require("chalk");
@@ -20,41 +24,48 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("Connected as id ", connection.threadId);
 
-
-    showProducts(function(){
+    startFunction();
+    showProducts(function () {
         console.log(" ");
-         inquirer.prompt({
-                name: "action",
-                type: "list",
-                message: "What would you like to do?",
-                choices: ["Purchase", "Exit"]
-            }).then(function (answer) {
-                if (answer.action === "Purchase") {
-                    console.log(" ");
-                    console.log("YEAH, buy some shit!");
-                    console.log(" ");
+        inquirer.prompt({
+            name: "action",
+            type: "list",
+            message: "What would you like to do?",
+            choices: ["Purchase", "Exit"]
+        }).then(function (answer) {
+            if (answer.action === "Purchase") {
+                console.log(" ");
+                console.log("YEAH, buy some shit!");
+                console.log(" ");
 
-                    // go to the purchase function
-                    buyProducts();
-                } else {
-                    console.log(" ");
-                    console.log("Get the f**** out of here!");
-                    console.log(" ");
-                    connection.end();
-                }
-            })
+                // go to the purchase function
+                buyProducts();
+            } else {
+                console.log(" ");
+                console.log("Get the f**** out of here!");
+                console.log(" ");
+                connection.end();
+            }
+        })
         // console.log("After Products");
     });
 });
 
-// make this look nice
+
+// MAKE THIS LOOK SWEET! 
+function startFunction() {
+    console.log("Welcome to BAMAZON");
+    // showProducts()
+}
+
+
 function showProducts(myFunc) {
 
     var table = new Table({
-        head: ['ID', 'Item', 'Department', 'Price', 'Stock']
-        , colWidths: [10, 30, 30, 30, 30]
+        head: ['ID', 'Item', 'Department', 'Price', 'Stock'],
+        colWidths: [10, 30, 30, 30, 30]
     });
-    
+
 
     connection.query("select * from products", function (err, data) {
         if (err) throw err;
@@ -70,7 +81,6 @@ function showProducts(myFunc) {
         }
         console.log(table.toString());
         myFunc();
-        // return table.toString();
     });
 }
 
@@ -91,9 +101,9 @@ function buyProducts() {
         ])
         .then(function (answer) {
             connection.query("select productName,  price, quantity from products where id=?", answer.buyItem, function (err, data) {
-                if(err) throw err;
+                if (err) throw err;
                 console.log(" ");
-                // console.log("answers", answer.buyQuantity); // may have to parse
+                // console.log("answers", answer.buyQuantity); 
                 // console.log("database", data[0].quantity);
                 itemPurchased = data[0].productName;
                 console.log(itemPurchased);
@@ -105,27 +115,43 @@ function buyProducts() {
                 console.log(stockNum);
 
                 inquirer.prompt({
-                    name: "confirmOrder",
-                    type: "list",
-                    message: "Confirm order", // Fix so that is incorporates the items and quantities
-                    choices: ["Yes", "No"]
-                })
-                .then(function(answer){
-                    console.log(answer.confirmOrder);
-                })
-                // if confirm is yes do below, else showProducts()
-// compare to the stock number
+                        name: "confirmOrder",
+                        type: "list",
+                        message: "Confirm order: \n" +
+                            "Item: " + itemPurchased + "\n" +
+                            "Quantity: " + orderNum,
+                        choices: ["Yes", "No"]
+                    })
+                    .then(function (answer) {
+                        console.log(answer.confirmOrder);
 
-                if(orderNum <= stockNum){
-                    console.log("Processing Order");
-                    // compute price
-                    // append the db
-                    // showProducts()
-                }else{
-                    console.log("Not enough items in stock.");
-                    showProducts();
-                }
-                
+                        if (answer.confirmOrder === "Yes") {
+                            console.log("You said yes!");
+                            checkAvailability(orderNum, stockNum)
+                        } else {
+                            console.log("You said no!")
+                            showProducts();
+                        }
+                    });
             })
         })
 } // end of buyProducts function
+
+
+function checkAvailability() {
+    if (orderNum <= stockNum) {
+        console.log("Processing Order");
+        computePrice(orderNum, price);
+        // append the db
+        showProducts()
+    } else {
+        console.log("Not enough items in stock.");
+        showProducts(myFunc); // not quite right
+    }
+} // end of checkAvailility function
+
+
+function computePrice(orderNum, price) {
+    var totalPrice = orderNum * price;
+    console.log("You total price is: " + totalPrice);
+} // end of computePrice function
