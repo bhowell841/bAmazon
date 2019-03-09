@@ -1,17 +1,14 @@
-// Fix too many purchase
-// update the db
-// return to main after purchase
 
-var mysql = require("mysql");
-var inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
 const chalk = require("chalk");
-var Table = require('cli-table');
+const Table = require('cli-table');
 
-// look up stopping asynchonous
-var choiceArray = [];
+// require("dotenv").config();
+// var keys = require("./keys.js");
 
 // create connection
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
@@ -19,47 +16,54 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-// 
+
 connection.connect(function (err) {
     if (err) throw err;
     console.log("Connected as id ", connection.threadId);
 
     startFunction();
-    showProducts(function () {
-        console.log(" ");
-        inquirer.prompt({
-            name: "action",
-            type: "list",
-            message: "What would you like to do?",
-            choices: ["Purchase", "Exit"]
-        }).then(function (answer) {
-            if (answer.action === "Purchase") {
-                console.log(" ");
-                console.log("YEAH, buy some shit!");
-                console.log(" ");
+    showProducts(inquirerPrompt);
+})
 
-                // go to the purchase function
-                buyProducts();
-            } else {
-                console.log(" ");
-                console.log("Get the f**** out of here!");
-                console.log(" ");
-                connection.end();
-            }
-        })
-        // console.log("After Products");
-    });
-});
+function inquirerPrompt() {
+    console.log(" ");
+    inquirer.prompt({
+        name: "action",
+        type: "list",
+        message: "What would you like to do?",
+        choices: ["Make A Purchase", "Exit"]
+    }).then(function (answer) {
+        if (answer.action === "Make A Purchase") {
+            console.log(" ");
+            console.log(chalk.blue("Yes, Let's Spend Some Money"));
+            console.log(" ");
+
+            // go to the purchase function
+            buyProducts();
+        } else {
+            console.log(" ");
+            console.log(chalk.red("----------------------------------------"));
+            console.log(chalk.red("          Come Back Real Soon!          "));
+            console.log(chalk.red("----------------------------------------"));
+            console.log(" ");
+            connection.end();
+        }
+    })
+    // console.log("After Products");
+};
 
 
-// MAKE THIS LOOK SWEET! 
+
 function startFunction() {
-    console.log("Welcome to BAMAZON");
+    console.log(chalk.yellow("----------------------------------------"));
+    console.log(chalk.yellow("-----------")+chalk.blue("Welcome to %s"), chalk.bold("BAMAZON")+chalk.yellow("-----------"));
+    console.log(chalk.yellow("-----")+chalk.green("Enjoy Your shopping experience")+chalk.yellow("-----"));
+    console.log(chalk.yellow("----------------------------------------"));
     // showProducts()
 }
 
 
-function showProducts(myFunc) {
+function showProducts() {    //(myFunc) {
 
     var table = new Table({
         head: ['ID', 'Item', 'Department', 'Price', 'Stock'],
@@ -80,7 +84,7 @@ function showProducts(myFunc) {
             table.push([id, productName, departmentName, price, quantity]);
         }
         console.log(table.toString());
-        myFunc();
+        inquirerPrompt();
     });
 }
 
@@ -105,15 +109,26 @@ function buyProducts() {
                 console.log(" ");
                 // console.log("answers", answer.buyQuantity); 
                 // console.log("database", data[0].quantity);
+                
+                // Set the product ID in a variable
                 let productId = answer.buyItem;
+
+                // Set the name of the item in a variable
                 var itemPurchased = data[0].productName;
-                console.log(itemPurchased);
-                var price = parseInt(data[0].price);
-                console.log(price);
+                // console.log(itemPurchased);
+
+                //  Set the price in a variable
+                var price = parseFloat(data[0].price);
+                // console.log(price);
+
+                // Set the amount ordered in a variable
                 var orderNum = parseInt(answer.buyQuantity);
-                console.log(orderNum);
+                // console.log(orderNum);
+
+                // Set the amount in stock in a variable
                 var stockNum = data[0].quantity;
-                console.log(stockNum);
+                // console.log(stockNum);
+
 
                 inquirer.prompt({
                         name: "confirmOrder",
@@ -123,19 +138,35 @@ function buyProducts() {
                             "Quantity: " + orderNum,
                         choices: ["Yes", "No"]
                     })
-                    .then(function (answer) {
-                        console.log(answer.confirmOrder);
+                    .then(function(answer) {
+                        // console.log(answer.confirmOrder);
 
                         if (answer.confirmOrder === "Yes") {
-                            console.log("You said yes!");
-                            checkAvailability(orderNum, stockNum, price)
-                            computePrice(orderNum, price);
-                            var newQuantity = stockNum - orderNum;
-                            console.log(newQuantity);
-                            updateDatabase(newQuantity, productId);
+                            console.log(" ");
+                            console.log(chalk.green("       Your Order Has Been Confirmed    "));
+                            console.log(" ");
+
+                            // Check product availability
+                            checkAvailability(orderNum, stockNum, price, productId)
+
                             
+                            // Update the database with the new quantity
+                            // updateDatabase(newQuantity, productId);
+
+
+                            // console.log(chalk.green("----------------------------------------"));
+                            // console.log(chalk.green("--------Your order is on its way--------"));
+                            // console.log(chalk.green("----------------------------------------"));
+                            // console.log(" ");
+
+                            // Go back the the start 
+                            // showProducts();
                         } else {
-                            console.log("You said no!")
+                            console.log(chalk.red("-----------------------------------------"));
+                            console.log(chalk.red("      Your Order Has Been Cancelled      "));
+                            console.log(chalk.red("-----------------------------------------"));
+                            console.log(" ");
+                            // Go back to the start
                             showProducts();
                         }
                     });
@@ -144,30 +175,44 @@ function buyProducts() {
 } // end of buyProducts function
 
 
-function checkAvailability(orderNum, stockNum, price) {
+function checkAvailability(orderNum, stockNum, price, productId) {
     if (orderNum <= stockNum) {
-        console.log("Processing Order");
-        // computePrice(orderNum, price);
-        // updateDatabase(newQuantity);
-        // append the db
-        // showProducts()
+        console.log(chalk.yellow("              Processing Order"));
+        // Compute the new quanitity of the item
+        var newQuantity = stockNum - orderNum;
+        //console.log(newQuantity);
+        computePrice(orderNum, price, newQuantity, productId);
+
     } else {
-        console.log("Not enough items in stock.");
-        showProducts(myFunc); 
+        console.log(chalk.red("----------------------------------------"));
+        console.log(chalk.red("We Are Sorry, Not Enough Items In Stock."));
+        console.log(chalk.red("      Your Order Has Been Cancelled.    "));
+        console.log(chalk.red("----------------------------------------"));
+        showProducts(); 
     }
 } // end of checkAvailility function
 
 
-function computePrice(orderNum, price) {
+function computePrice(orderNum, price, newQuantity, productId) {
     var totalPrice = orderNum * price;
-    console.log("You total price is: " + totalPrice);
+    console.log(chalk.green("        You total price is: $" + totalPrice));
+    console.log(" ")
+    console.log(chalk.green("----------------------------------------"));
+    console.log(chalk.green("--------Your order is on its way--------"));
+    console.log(chalk.green("----------------------------------------"));
+    console.log(" ");
+
+    // Go back the the start 
+    //showProducts();
+    updateDatabase(newQuantity, productId);
 } // end of computePrice function
 
-function updateDatabase(newQuantity, productId){
+function updateDatabase(newQuantity, productId) {
     connection.query(
-        'UPDATE products SET quantity = ? WHERE id = ?', [newQuantity, productId], function(err){
-            if(err) throw err;
+        'UPDATE products SET quantity = ? WHERE id = ?', [newQuantity, productId],
+        function (err) {
+            if (err) throw err;
         }
     )
+    showProducts()
 } // end updateDatabase function
-
