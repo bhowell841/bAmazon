@@ -149,18 +149,6 @@ function buyProducts() {
                             // Check product availability
                             checkAvailability(orderNum, stockNum, price, productId)
 
-                            
-                            // Update the database with the new quantity
-                            // updateDatabase(newQuantity, productId);
-
-
-                            // console.log(chalk.green("----------------------------------------"));
-                            // console.log(chalk.green("--------Your order is on its way--------"));
-                            // console.log(chalk.green("----------------------------------------"));
-                            // console.log(" ");
-
-                            // Go back the the start 
-                            // showProducts();
                         } else {
                             console.log(chalk.red("-----------------------------------------"));
                             console.log(chalk.red("      Your Order Has Been Cancelled      "));
@@ -202,8 +190,6 @@ function computePrice(orderNum, price, newQuantity, productId) {
     console.log(chalk.green("----------------------------------------"));
     console.log(" ");
 
-    // Go back the the start 
-    //showProducts();
     updateDatabase(newQuantity, productId);
 } // end of computePrice function
 
