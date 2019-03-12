@@ -5,4 +5,3 @@ exports.dbpassword = {
     password: process.env.DBPASSWORD ,
     database: process.env.DBDATABASE
   };
-  

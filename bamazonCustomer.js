@@ -4,17 +4,25 @@ const inquirer = require("inquirer");
 const chalk = require("chalk");
 const Table = require('cli-table');
 
-// require("dotenv").config();
-// var keys = require("./keys.js");
+var dotenv = require("dotenv");
+dotenv.load();
+// console.log(process.env);
 
-// create connection
 const connection = mysql.createConnection({
-    host: "localhost",
-    port: 3306,
-    user: "root",
-    password: "Liam2009",
-    database: "bamazon"
+host: process.env.DBHOST,
+    port: process.env.DBPORT,
+    user: process.env.DBUSER,
+    password: process.env.DBPASSWORD ,
+    database: process.env.DBDATABASE
 });
+// create connection
+// const connection = mysql.createConnection({
+//     host: "localhost",
+//     port: 3306,
+//     user: "root",
+//     password: "Liam2009",
+//     database: "bamazon"
+// });
 
 
 connection.connect(function (err) {
@@ -67,7 +75,7 @@ function showProducts() {    //(myFunc) {
 
     var table = new Table({
         head: ['ID', 'Item', 'Department', 'Price', 'Stock'],
-        colWidths: [10, 30, 30, 30, 30]
+        colWidths: [10, 30, 30, 20, 10]
     });
 
 
