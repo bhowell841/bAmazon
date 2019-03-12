@@ -1,4 +1,3 @@
-
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
@@ -8,21 +7,14 @@ var dotenv = require("dotenv");
 dotenv.load();
 // console.log(process.env);
 
+// create connection
 const connection = mysql.createConnection({
-host: process.env.DBHOST,
+    host: process.env.DBHOST,
     port: process.env.DBPORT,
     user: process.env.DBUSER,
-    password: process.env.DBPASSWORD ,
+    password: process.env.DBPASSWORD,
     database: process.env.DBDATABASE
 });
-// create connection
-// const connection = mysql.createConnection({
-//     host: "localhost",
-//     port: 3306,
-//     user: "root",
-//     password: "Liam2009",
-//     database: "bamazon"
-// });
 
 
 connection.connect(function (err) {
@@ -64,14 +56,14 @@ function inquirerPrompt() {
 
 function startFunction() {
     console.log(chalk.yellow("----------------------------------------"));
-    console.log(chalk.yellow("-----------")+chalk.blue("Welcome to %s"), chalk.bold("BAMAZON")+chalk.yellow("-----------"));
-    console.log(chalk.yellow("-----")+chalk.green("Enjoy Your shopping experience")+chalk.yellow("-----"));
+    console.log(chalk.yellow("-----------") + chalk.blue("Welcome to %s"), chalk.bold("BAMAZON") + chalk.yellow("-----------"));
+    console.log(chalk.yellow("-----") + chalk.green("Enjoy Your shopping experience") + chalk.yellow("-----"));
     console.log(chalk.yellow("----------------------------------------"));
     // showProducts()
 }
 
 
-function showProducts() {    //(myFunc) {
+function showProducts() { //(myFunc) {
 
     var table = new Table({
         head: ['ID', 'Item', 'Department', 'Price', 'Stock'],
@@ -117,7 +109,7 @@ function buyProducts() {
                 console.log(" ");
                 // console.log("answers", answer.buyQuantity); 
                 // console.log("database", data[0].quantity);
-                
+
                 // Set the product ID in a variable
                 let productId = answer.buyItem;
 
@@ -146,7 +138,7 @@ function buyProducts() {
                             "Quantity: " + orderNum,
                         choices: ["Yes", "No"]
                     })
-                    .then(function(answer) {
+                    .then(function (answer) {
                         // console.log(answer.confirmOrder);
 
                         if (answer.confirmOrder === "Yes") {
@@ -184,7 +176,7 @@ function checkAvailability(orderNum, stockNum, price, productId) {
         console.log(chalk.red("We Are Sorry, Not Enough Items In Stock."));
         console.log(chalk.red("      Your Order Has Been Cancelled.    "));
         console.log(chalk.red("----------------------------------------"));
-        showProducts(); 
+        showProducts();
     }
 } // end of checkAvailility function
 
